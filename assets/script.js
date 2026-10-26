@@ -65,23 +65,16 @@
     details.append(summary, video); media.append(details); videoCount++;
   });
   if (videoCount) $('.possibilities').append(media);
-  const bookingUrl = safeUrl(cfg.booking?.url);
+  // 予約ボタンはページ内の予約フォーム（#reflame-booking）へ移動するだけ。予約ページへは飛ばさない。
+  // 予約フォームは SF日程調整ツールの埋め込み（枠 mid-ad-mk）。流入情報はフォーム自身がページのURLから送る。
+  // 予約完了（schedule_complete）もフォーム自身が dataLayer に送るため、ここでは送らない（送ると1件が2回数えられる）。
   document.querySelectorAll('[data-cta]').forEach((anchor) => {
-    if (bookingUrl) {
-      const target = new URL(bookingUrl);
-      attributionKeys.forEach((key) => {
-        const value = attribution[key];
-        if (typeof value === 'string' && value.length <= 160 && /^[a-zA-Z0-9_\-.~]+$/.test(value) && (key !== 'creative' || ['ranking', 'skills'].includes(value))) target.searchParams.set(key, value);
-      });
-      anchor.href = target.href;
-    }
     anchor.addEventListener('click', () => emit('cta_click', { cta_location: anchor.dataset.cta }));
   });
   emit('lp_view', {}, 'lp_view');
-  // 外部予約ページへのクリックは受付成功・日時確定として送らない。
   const sticky = $('#sticky-cta');
   const heroCta = $('.hero-copy .button');
-  const finalCta = $('#final-booking-cta');
+  const finalCta = $('#reflame-booking');
   function inView(node) {
     const r = node.getBoundingClientRect();
     return r.bottom > 0 && r.top < window.innerHeight;
@@ -99,4 +92,20 @@
   window.addEventListener('resize', scheduleUpdate);
   window.addEventListener('pageshow', scheduleUpdate);
   updateSticky();
+  // 予約フォームは予約ツールの描画領域（shadowRoot）の中にあり、ページのCSSが届かない。スマホでは中の11〜13pxの文字をここで14pxに上げる（予約ツールが描き直しても付け直す）。
+  const bookingFontCss = '@media (max-width:768px){label,.step,.fe,.wk-lbl,.wk-hint,.wk-head .wk-dow,.date,.who-bio,.who-back{font-size:14px!important}}';
+  let bookingTries = 0;
+  (function liftBookingFontSize() {
+    const root = document.getElementById('reflame-booking-widget')?.shadowRoot;
+    if (!root) { if (++bookingTries < 120) setTimeout(liftBookingFontSize, 250); return; }
+    const paint = () => {
+      if (root.getElementById('rf-font-14')) return;
+      const style = document.createElement('style');
+      style.id = 'rf-font-14';
+      style.textContent = bookingFontCss;
+      root.appendChild(style);
+    };
+    paint();
+    new MutationObserver(paint).observe(root, { childList: true });
+  })();
 })();

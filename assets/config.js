@@ -5,7 +5,7 @@ window.LP_CONFIG = {
   legalCompanyName: '株式会社REFLAME', licenseNumber: '27-ユ-303562',
   // 公式サイト(reflame.co.jp)のナビゲーションで実在を確認済み。推測URLではない。
   companyUrl: 'https://reflame.co.jp/company/', privacyUrl: 'https://reflame.co.jp/privacy/',
-  booking: { url: 'https://designer.my.site.com/scheduling?slug=mid-ad-mk' },
+  // 予約はページ内の埋め込みフォーム（index.html の #reflame-booking・枠 mid-ad-mk）。予約ページのURLはここに持たない（2026-10-26〜）。
   tracking: { enabled: true, gtmId: 'GTM-5KH7WRCP', metaPixelId: '' },
   assets: { rankingVideo: '', skillsVideo: '', heroImage: '' },
   conditions: { acceptsUndecided: null, acceptsTeacherOnly: null, acceptsFutureTiming: null, meetingMethod: '' },
